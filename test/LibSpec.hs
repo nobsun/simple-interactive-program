@@ -25,7 +25,7 @@ instance Show a => Show (UString a) where
 spec :: Spec
 spec = describe "someFunc"
   $ it "任意の入力文字列を\"なんか関数\"に変換" 
-  $ UString (someFunc "Hi!\n元気?") `shouldBe` "なんか関数\nなんか関数\n"
+  $ UString (someFunc undefined "Hi!\n元気?") `shouldBe` "なんか関数\nなんか関数\n"
 
 -- spec :: Spec
 -- spec = describe "someFunc" $ do
