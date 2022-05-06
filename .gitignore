@@ -3,6 +3,7 @@ dist-new/
 simple-interactive-program.cabal
 *.log
 core
+core.*
 *.hi
 *.o
 *~
