@@ -8,7 +8,8 @@ import Interact
 
 {- | 
 任意の入力列をそれぞれの入力文字列を"なんか関数"に変換
->>> putStr $ responser undefined ["Hi.", "お元気ですか？"]
+>>> putStr $ unlines $ responser undefined ["Hi.", "お元気ですか？"]
+なんか関数
 なんか関数
 -}
 
@@ -29,7 +30,7 @@ initial extra inputs
     = MachineState
     { inChan = inputs
     , output = Nothing
-    , innerState = error "initial is not implemented" extra
+    , innerState = error "initial InnerState is not implemented" extra
     }
 
 eval :: MachineState -> [MachineState]

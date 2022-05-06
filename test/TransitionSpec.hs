@@ -1,5 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
-module LibSpec
+module TransitionSpec
   ( spec
   ) where
 
@@ -9,7 +9,7 @@ import qualified Data.ByteString as B
 import Test.Main
 import Test.Hspec
 import Text.Show.Unicode
-import Lib
+import Transition
 
 newtype UString a = UString a deriving Eq
 
@@ -25,7 +25,7 @@ instance Show a => Show (UString a) where
 spec :: Spec
 spec = describe "responser"
   $ it "任意の入力文字列を\"なんか関数\"に変換" 
-  $ UString (responser undefined ["Hi!", "元気?"]) `shouldBe` ["なんか関数", "なんか関数"]
+  $ map UString (responser undefined ["Hi!", "元気?"]) `shouldBe` ["なんか関数", "なんか関数"]
 
 -- spec :: Spec
 -- spec = describe "someFunc" $ do
