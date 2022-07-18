@@ -1,19 +1,18 @@
 module Main where
 
+import Control.Concurrent.Chan
+import Control.Exception
 import Data.Char
-import System.Environment ( getArgs )
-import Data.List.Extra
-import Transition ( responser )
-import Interact ( interactWithPrompt
-                , interactWithPrompt'
-                )
-
--- main :: IO ()
--- main = interactWithPrompt "? " ":quit" . responser =<< list (return "") (const . readFile) =<< getArgs
+import Interact ( InputConfig (..), interact' ) 
+import Transition ( responder )
 
 main :: IO ()
-main = interactWithPrompt' "? " ":quit" sample
+main = do 
+    { req <- newChan
+    ; res <- newChan
+    ; catch (interact' (InputConfig "? " ":quit" Nothing) req res sample ((putStr . unlines =<<) . getChanContents))
+            (\ BlockedIndefinitelyOnMVar -> return ())
+    }
 
 sample :: [String] -> [String]
 sample = ((toUpper <$>) <$>)
-

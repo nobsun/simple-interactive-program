@@ -1,42 +1,65 @@
 module Interact
-    ( interactWithPrompt
-    , interactWithPrompt'
+    ( InputConfig (..)
+    , interact
+    , interact'
     ) where
 
+import Prelude hiding ( interact )
 import Control.Concurrent
 import Control.Concurrent.Chan
+import Control.Exception
+import Data.Bool
+import Data.Maybe
 import System.IO.Unsafe
 import System.Console.Haskeline
 
-interactWithPrompt :: String -> String -> ([String] -> [String]) -> IO ()
-interactWithPrompt prompt quit f 
-    = putStr . unlines . f =<< loop
-    where
-        loop :: IO [String]
-        loop = unsafeInterleaveIO $ do
-            { minput <- runInputT defaultSettings (getInputLine prompt)
-            ; case minput of
-                Nothing   -> return []
-                Just line
-                    | line == quit -> return []
-                    | otherwise    -> (line :) <$> loop
-            }
+type Prompt        = String
+type Quit          = String
+type History       = Maybe FilePath
 
-interactWithPrompt' :: String -> String -> ([String] -> [String]) -> IO ()
-interactWithPrompt' prompt quit f = do
-    { o   <- newChan
-    ; tid <- forkIO (g o)
-    ; putStr . unlines =<< getChanContents o
+data InputConfig   
+    = InputConfig
+    { prompt :: Prompt
+    , quit   :: Quit
+    , history :: History
     }
-    where
-        g    :: Chan String -> IO ()
-        g o  = writeList2Chan o . f =<< loop
-        loop :: IO [String]
-        loop = unsafeInterleaveIO $ do
-            { minput <- runInputT defaultSettings (getInputLine prompt)
-            ; case minput of
-                Nothing   -> return []
-                Just line
-                    | line == quit -> return []
-                    | otherwise    -> (line :) <$> loop
-            }
+type Dialogue a b  = [a] -> [b]
+
+interact :: InputConfig
+         -> Dialogue String String 
+         -> IO ()
+interact config dialogue
+    = putStr . unlines . dialogue =<< inputLines config
+
+inputLines :: InputConfig -> IO [String]
+inputLines config 
+    = unsafeInterleaveIO
+    $ do
+    { minput <- runInputT (defaultSettings { historyFile = history config})
+                          (getInputLine (prompt config))
+    ; case minput of
+        Nothing -> return []
+        Just line 
+            | line == quit config -> return []
+            | otherwise           -> (line :) <$> inputLines config
+    }
+
+type Render a = Chan a -> IO ()
+
+interact' :: InputConfig 
+           -> Chan String
+           -> Chan a
+           -> Dialogue String a 
+           -> Render a
+           -> IO ()
+interact' config req res dialogue render = do
+    { pid <- forkIO (inputLines' config req)
+    ; qid <- forkIO (writeList2Chan res . dialogue =<< getChanContents req)
+    ; render res
+    }
+
+inputLines' :: InputConfig -> Chan String -> IO ()
+inputLines' config chan
+    = maybe (return ())
+            (\ line -> bool (return ()) (writeChan chan line >> inputLines' config chan) (line /= quit config))
+    =<< runInputT (defaultSettings { historyFile = history config}) (getInputLine (prompt config))

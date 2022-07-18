@@ -1,5 +1,6 @@
 .stack-work/
 dist-new/
+dist-newstyle/
 simple-interactive-program.cabal
 *.log
 core
