@@ -1,6 +1,0 @@
-:q
-:t defaultSettings
-:l src/Interact.hs
-:q
-:l src/Interaction.hs
-:l src/Interaction.hss
