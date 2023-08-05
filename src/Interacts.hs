@@ -13,7 +13,8 @@ import Control.Exception
     ( handle, BlockedIndefinitelyOnMVar, IOException )
 import System.Timeout ( timeout )
 
-interacts :: (?msg :: String, ?tm :: Int) => ([String] -> [String]) -> IO ()
+interacts :: (?msg :: String, ?tm :: Int)
+          => ([String] -> [String]) -> IO ()
 interacts f = do
     { ch <- newChan
     ; _  <- forkIO (getLines ch)
@@ -21,7 +22,8 @@ interacts f = do
     $ putStr . unlines . f =<< getChanContents ch
     }
 
-getLines :: (?msg :: String, ?tm :: Int) => Chan String -> IO ()
+getLines :: (?msg :: String, ?tm :: Int)
+         => Chan String -> IO ()
 getLines chan
     = handle (const done :: IOException -> IO ())
     $ getLine' >>= writeChan chan >> getLines chan

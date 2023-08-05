@@ -1,19 +1,34 @@
+{-# LANGUAGE ImplicitParams #-}
 module Main where
 
-import Control.Concurrent.Chan
-import Control.Exception
-import Data.Char
-import Data.List.Extra
+import Control.Concurrent.Chan ( newChan )
+-- import Control.Exception
+import Data.Char ( ord, toUpper )
+import Data.List.Extra ( list )
 import Interact
-import System.Environment
+    ( defaultInputConfig,
+      genericInteract,
+      inputLines,
+      inputLines',
+      outputLines,
+      outputLines',
+      outputLinesWithPrompt,
+      outputLinesWithPrompt',
+      Prompt )
+import Interacts
+import System.Environment ( getArgs )
 
 main :: IO ()
-main = (interactions !!) . (`mod` 8) 
+main = (interactions !!) . (`mod` len0) 
    =<< list (return 0) (((return . read) .) . const)
    =<< getArgs 
 
 interactions :: [IO ()]
-interactions = [foo, foo', bar, bar', baz, baz', qux, qux']
+interactions = [foo, foo', bar, bar', baz, baz', qux, qux'
+               ,soko]
+
+len0 :: Int
+len0 = length interactions
 
 toUpperCase :: [String] -> [String]
 toUpperCase = map upcase
@@ -73,4 +88,11 @@ qux' = do
     ; genericInteract (inputLines' defaultInputConfig)
                       (outputLinesWithPrompt' chan)
                       (toUpperCaseWithPrompt "? ")
+    }
+
+soko :: IO ()
+soko = do
+    { chan <- newChan
+    ; let { ?msg = timeoutMsg; ?tm = tenSecs }
+    ; interacts (map (map toUpper)) 
     }
