@@ -28,14 +28,14 @@ type Prompt        = String
 type Quit          = String
 type HistoryFile   = Maybe FilePath
 
-data InputConfig   
+data InputConfig
     = InputConfig
     { quit    :: Quit
     , history :: HistoryFile
     }
 
 defaultInputConfig :: InputConfig
-defaultInputConfig = InputConfig ":q" Nothing
+defaultInputConfig = InputConfig { quit =":q", history = Nothing }
 
 type Dialogue a b  = [a] -> [b]
 
@@ -90,3 +90,5 @@ outputLinesWithPrompt' chan ss = do
 
 eot :: String
 eot = "\EOT"
+
+-- inputs with time out
